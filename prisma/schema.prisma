@@ -1,0 +1,130 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// ─── USERS & AUTH ─────────────────────────────────────────────
+
+model User {
+  id           String   @id @default(uuid())
+  name         String
+  email        String   @unique
+  passwordHash String
+  role         String   @default("STUDENT") // ADMIN, COACH, STUDENT
+  createdAt    DateTime @default(now())
+
+  inviteCodeUsed   InviteCode?   @relation("UsedBy")
+  inviteCodesCreated InviteCode[] @relation("CreatedBy")
+  studyLogs        StudyLog[]
+  quizSessions     QuizSession[]
+  monthlyTests     MonthlyTest[] @relation("StudentTests")
+  testsEnteredBy   MonthlyTest[] @relation("EnteredBy")
+  settingsUpdated  AppSetting[]
+}
+
+model InviteCode {
+  id         String   @id @default(uuid())
+  code       String   @unique
+  targetRole String   // COACH or STUDENT
+  createdBy  String
+  creator    User     @relation("CreatedBy", fields: [createdBy], references: [id])
+  usedBy     String?  @unique
+  usedUser   User?    @relation("UsedBy", fields: [usedBy], references: [id])
+  expiresAt  DateTime?
+  createdAt  DateTime @default(now())
+}
+
+// ─── QUESTION BANK ────────────────────────────────────────────
+
+model Question {
+  id           String   @id @default(uuid())
+  subject      String   // LIFE_SCIENCE, EARTH_SPACE, PHYSICAL_SCIENCE, MATH, ENERGY
+  topic        String   @default("")
+  difficulty   Int      @default(4) // 1-5
+  questionType String   @default("TOSS_UP") // TOSS_UP, BONUS
+  answerFormat String   @default("MULTIPLE_CHOICE") // MULTIPLE_CHOICE, SHORT_ANSWER
+  questionText String
+  choices      String?  // JSON array: ["W) ...", "X) ...", "Y) ...", "Z) ..."]
+  correctAnswer String
+  sourceSet    Int?
+  sourceRound  Int?
+  createdAt    DateTime @default(now())
+
+  quizAnswers  QuizAnswer[]
+}
+
+// ─── STUDY TRACKING ───────────────────────────────────────────
+
+model StudyLog {
+  id             String   @id @default(uuid())
+  userId         String
+  user           User     @relation(fields: [userId], references: [id])
+  subject        String
+  topic          String
+  subtopic       String?
+  timeSpentMin   Int
+  selfDifficulty Int      // 1-5
+  isReview       Boolean  @default(false)
+  notes          String?
+  studyDate      DateTime
+  createdAt      DateTime @default(now())
+}
+
+// ─── QUIZZES ──────────────────────────────────────────────────
+
+model QuizSession {
+  id               String   @id @default(uuid())
+  userId           String
+  user             User     @relation(fields: [userId], references: [id])
+  format           String   @default("QA") // QA or NSB
+  subjectsSelected String   // JSON array
+  totalQuestions   Int
+  correctCount     Int      @default(0)
+  avgDifficulty    Float    @default(0)
+  startedAt        DateTime @default(now())
+  completedAt      DateTime?
+
+  answers          QuizAnswer[]
+}
+
+model QuizAnswer {
+  id            String   @id @default(uuid())
+  quizSessionId String
+  quizSession   QuizSession @relation(fields: [quizSessionId], references: [id])
+  questionId    String
+  question      Question @relation(fields: [questionId], references: [id])
+  userAnswer    String
+  isCorrect     Boolean
+  answeredAt    DateTime @default(now())
+}
+
+// ─── MONTHLY TESTS ────────────────────────────────────────────
+
+model MonthlyTest {
+  id              String   @id @default(uuid())
+  userId          String
+  user            User     @relation("StudentTests", fields: [userId], references: [id])
+  testDate        DateTime
+  score           Int
+  total           Int
+  percentAccuracy Float
+  notes           String?
+  enteredBy       String
+  enteredByUser   User     @relation("EnteredBy", fields: [enteredBy], references: [id])
+  createdAt       DateTime @default(now())
+}
+
+// ─── SETTINGS ─────────────────────────────────────────────────
+
+model AppSetting {
+  key       String   @id
+  value     String
+  updatedBy String?
+  updater   User?    @relation(fields: [updatedBy], references: [id])
+  updatedAt DateTime @default(now())
+}
