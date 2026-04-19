@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 
 interface Question {
   id: string;
@@ -12,6 +12,7 @@ interface Question {
   questionText: string;
   choices: string | null;
   correctAnswer: string;
+  source: string | null;
   createdAt: string;
 }
 
@@ -23,12 +24,19 @@ const SUBJECTS = [
   "ENERGY",
 ];
 
+const PAGE_SIZE = 50;
+
 export default function QuestionsPage() {
   const [questions, setQuestions] = useState<Question[]>([]);
+  const [total, setTotal] = useState(0);
+  const [page, setPage] = useState(1);
   const [loading, setLoading] = useState(true);
   const [filterSubject, setFilterSubject] = useState("");
   const [filterDifficulty, setFilterDifficulty] = useState("");
   const [filterType, setFilterType] = useState("");
+  const [filterSource, setFilterSource] = useState("");
+  const [searchInput, setSearchInput] = useState("");
+  const [search, setSearch] = useState("");
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
@@ -44,16 +52,41 @@ export default function QuestionsPage() {
     correctAnswer: "",
   });
 
+  const searchTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  useEffect(() => {
+    if (searchTimer.current) clearTimeout(searchTimer.current);
+    searchTimer.current = setTimeout(() => {
+      setSearch(searchInput);
+      setPage(1);
+    }, 300);
+    return () => {
+      if (searchTimer.current) clearTimeout(searchTimer.current);
+    };
+  }, [searchInput]);
+
+  useEffect(() => {
+    setPage(1);
+  }, [filterSubject, filterDifficulty, filterType, filterSource]);
+
   const fetchQuestions = useCallback(async () => {
+    setLoading(true);
     const params = new URLSearchParams();
     if (filterSubject) params.set("subject", filterSubject);
     if (filterDifficulty) params.set("difficulty", filterDifficulty);
     if (filterType) params.set("type", filterType);
+    if (filterSource) params.set("source", filterSource);
+    if (search) params.set("search", search);
+    params.set("page", String(page));
+    params.set("pageSize", String(PAGE_SIZE));
 
     const res = await fetch(`/api/questions?${params.toString()}`);
-    if (res.ok) setQuestions(await res.json());
+    if (res.ok) {
+      const data = await res.json();
+      setQuestions(data.items ?? []);
+      setTotal(data.total ?? 0);
+    }
     setLoading(false);
-  }, [filterSubject, filterDifficulty, filterType]);
+  }, [filterSubject, filterDifficulty, filterType, filterSource, search, page]);
 
   useEffect(() => {
     fetchQuestions();
@@ -144,13 +177,9 @@ export default function QuestionsPage() {
     if (res.ok) fetchQuestions();
   }
 
-  if (loading) {
-    return (
-      <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
-        <p className="text-gray-500">Loading...</p>
-      </div>
-    );
-  }
+  const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
+  const rangeStart = total === 0 ? 0 : (page - 1) * PAGE_SIZE + 1;
+  const rangeEnd = Math.min(page * PAGE_SIZE, total);
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
@@ -216,6 +245,30 @@ export default function QuestionsPage() {
             <option value="TOSS_UP">Toss-Up</option>
             <option value="BONUS">Bonus</option>
           </select>
+        </div>
+        <div>
+          <label className="mb-1 block text-xs font-medium text-gray-500">
+            Source
+          </label>
+          <input
+            type="text"
+            value={filterSource}
+            onChange={(e) => setFilterSource(e.target.value)}
+            placeholder="e.g. doe-hs"
+            className="rounded-md border border-gray-300 px-3 py-1.5 text-sm focus:border-[#0078d4] focus:outline-none"
+          />
+        </div>
+        <div className="min-w-[200px] flex-1">
+          <label className="mb-1 block text-xs font-medium text-gray-500">
+            Search
+          </label>
+          <input
+            type="text"
+            value={searchInput}
+            onChange={(e) => setSearchInput(e.target.value)}
+            placeholder="Search text, answer, topic..."
+            className="w-full rounded-md border border-gray-300 px-3 py-1.5 text-sm focus:border-[#0078d4] focus:outline-none"
+          />
         </div>
       </div>
 
@@ -374,12 +427,37 @@ export default function QuestionsPage() {
 
       {/* Questions table */}
       <div className="rounded-lg border border-gray-200 bg-white shadow-sm">
-        <div className="border-b border-gray-200 bg-gray-50 px-6 py-3">
-          <p className="text-sm text-gray-500">
-            {questions.length} question{questions.length !== 1 ? "s" : ""}
+        <div className="flex flex-wrap items-center justify-between gap-3 border-b border-gray-200 bg-gray-50 px-6 py-3">
+          <p className="text-sm text-gray-600">
+            {loading
+              ? "Loading..."
+              : total === 0
+                ? "No questions found."
+                : `Showing ${rangeStart}–${rangeEnd} of ${total.toLocaleString()}`}
           </p>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => setPage((p) => Math.max(1, p - 1))}
+              disabled={page <= 1 || loading}
+              className="rounded-md border border-gray-300 px-3 py-1 text-sm font-medium text-gray-700 hover:bg-gray-100 disabled:opacity-40"
+            >
+              ← Prev
+            </button>
+            <span className="text-xs text-gray-500">
+              Page {page} / {totalPages}
+            </span>
+            <button
+              onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+              disabled={page >= totalPages || loading}
+              className="rounded-md border border-gray-300 px-3 py-1 text-sm font-medium text-gray-700 hover:bg-gray-100 disabled:opacity-40"
+            >
+              Next →
+            </button>
+          </div>
         </div>
-        {questions.length === 0 ? (
+        {loading && questions.length === 0 ? (
+          <p className="p-6 text-gray-500">Loading...</p>
+        ) : questions.length === 0 ? (
           <p className="p-6 text-gray-500">No questions found.</p>
         ) : (
           <div className="overflow-x-auto">
@@ -437,6 +515,25 @@ export default function QuestionsPage() {
             </table>
           </div>
         )}
+        <div className="flex items-center justify-end gap-2 border-t border-gray-200 bg-gray-50 px-6 py-3">
+          <button
+            onClick={() => setPage((p) => Math.max(1, p - 1))}
+            disabled={page <= 1 || loading}
+            className="rounded-md border border-gray-300 px-3 py-1 text-sm font-medium text-gray-700 hover:bg-gray-100 disabled:opacity-40"
+          >
+            ← Prev
+          </button>
+          <span className="text-xs text-gray-500">
+            Page {page} / {totalPages}
+          </span>
+          <button
+            onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+            disabled={page >= totalPages || loading}
+            className="rounded-md border border-gray-300 px-3 py-1 text-sm font-medium text-gray-700 hover:bg-gray-100 disabled:opacity-40"
+          >
+            Next →
+          </button>
+        </div>
       </div>
     </div>
   );

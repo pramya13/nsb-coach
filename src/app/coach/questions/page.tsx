@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { useSession } from "next-auth/react";
 
 interface Question {
@@ -15,6 +15,7 @@ interface Question {
   correctAnswer: string;
   sourceSet: number | null;
   sourceRound: number | null;
+  source: string | null;
   createdAt: string;
 }
 
@@ -27,6 +28,7 @@ const SUBJECTS = [
 ];
 const QUESTION_TYPES = ["TOSS_UP", "BONUS"];
 const ANSWER_FORMATS = ["MULTIPLE_CHOICE", "SHORT_ANSWER"];
+const PAGE_SIZE = 50;
 
 const emptyForm = {
   subject: "LIFE_SCIENCE",
@@ -46,27 +48,53 @@ export default function CoachQuestionsPage() {
   const isAdmin = session?.user?.role === "ADMIN";
 
   const [questions, setQuestions] = useState<Question[]>([]);
+  const [total, setTotal] = useState(0);
+  const [page, setPage] = useState(1);
   const [loading, setLoading] = useState(true);
   const [filterSubject, setFilterSubject] = useState("");
   const [filterType, setFilterType] = useState("");
+  const [filterSource, setFilterSource] = useState("");
+  const [searchInput, setSearchInput] = useState("");
+  const [search, setSearch] = useState("");
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [form, setForm] = useState(emptyForm);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
 
+  const searchTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  useEffect(() => {
+    if (searchTimer.current) clearTimeout(searchTimer.current);
+    searchTimer.current = setTimeout(() => {
+      setSearch(searchInput);
+      setPage(1);
+    }, 300);
+    return () => {
+      if (searchTimer.current) clearTimeout(searchTimer.current);
+    };
+  }, [searchInput]);
+
+  useEffect(() => {
+    setPage(1);
+  }, [filterSubject, filterType, filterSource]);
+
   const fetchQuestions = useCallback(async () => {
     setLoading(true);
     const params = new URLSearchParams();
     if (filterSubject) params.set("subject", filterSubject);
     if (filterType) params.set("type", filterType);
+    if (filterSource) params.set("source", filterSource);
+    if (search) params.set("search", search);
+    params.set("page", String(page));
+    params.set("pageSize", String(PAGE_SIZE));
     const res = await fetch(`/api/questions?${params}`);
     if (res.ok) {
       const data = await res.json();
-      setQuestions(data);
+      setQuestions(data.items ?? []);
+      setTotal(data.total ?? 0);
     }
     setLoading(false);
-  }, [filterSubject, filterType]);
+  }, [filterSubject, filterType, filterSource, search, page]);
 
   useEffect(() => {
     fetchQuestions();
@@ -133,6 +161,10 @@ export default function CoachQuestionsPage() {
     }
   };
 
+  const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
+  const rangeStart = total === 0 ? 0 : (page - 1) * PAGE_SIZE + 1;
+  const rangeEnd = Math.min(page * PAGE_SIZE, total);
+
   return (
     <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
       <div className="mb-6 flex flex-wrap items-center justify-between gap-4">
@@ -150,7 +182,7 @@ export default function CoachQuestionsPage() {
       </div>
 
       {/* Filters */}
-      <div className="mb-6 flex flex-wrap gap-4">
+      <div className="mb-6 flex flex-wrap gap-4 rounded-lg border border-gray-200 bg-white p-4 shadow-sm">
         <select
           value={filterSubject}
           onChange={(e) => setFilterSubject(e.target.value)}
@@ -175,10 +207,24 @@ export default function CoachQuestionsPage() {
             </option>
           ))}
         </select>
+        <input
+          type="text"
+          value={filterSource}
+          onChange={(e) => setFilterSource(e.target.value)}
+          placeholder="Source (e.g. doe-hs)"
+          className="rounded-md border border-gray-300 px-3 py-2 text-sm"
+        />
+        <input
+          type="text"
+          value={searchInput}
+          onChange={(e) => setSearchInput(e.target.value)}
+          placeholder="Search text, answer, topic..."
+          className="min-w-[220px] flex-1 rounded-md border border-gray-300 px-3 py-2 text-sm"
+        />
       </div>
 
       {error && (
-        <div className="mb-4 rounded-md bg-red-50 border border-red-200 p-3 text-sm text-red-700">
+        <div className="mb-4 rounded-md border border-red-200 bg-red-50 p-3 text-sm text-red-700">
           {error}
         </div>
       )}
@@ -323,7 +369,7 @@ export default function CoachQuestionsPage() {
               value={form.choices}
               onChange={(e) => setForm({ ...form, choices: e.target.value })}
               className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
-              placeholder='Optional for short answer'
+              placeholder="Optional for short answer"
             />
           </div>
           <div className="mt-4">
@@ -357,10 +403,38 @@ export default function CoachQuestionsPage() {
       )}
 
       {/* Questions Table */}
-      {loading ? (
-        <p className="text-gray-500">Loading questions...</p>
-      ) : (
-        <div className="overflow-hidden rounded-lg border border-gray-200 bg-white shadow-sm">
+      <div className="overflow-hidden rounded-lg border border-gray-200 bg-white shadow-sm">
+        <div className="flex flex-wrap items-center justify-between gap-3 border-b border-gray-200 bg-gray-50 px-4 py-3">
+          <p className="text-sm text-gray-600">
+            {loading
+              ? "Loading..."
+              : total === 0
+                ? "No questions found."
+                : `Showing ${rangeStart}–${rangeEnd} of ${total.toLocaleString()}`}
+          </p>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => setPage((p) => Math.max(1, p - 1))}
+              disabled={page <= 1 || loading}
+              className="rounded-md border border-gray-300 px-3 py-1 text-sm font-medium text-gray-700 hover:bg-gray-100 disabled:opacity-40"
+            >
+              ← Prev
+            </button>
+            <span className="text-xs text-gray-500">
+              Page {page} / {totalPages}
+            </span>
+            <button
+              onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+              disabled={page >= totalPages || loading}
+              className="rounded-md border border-gray-300 px-3 py-1 text-sm font-medium text-gray-700 hover:bg-gray-100 disabled:opacity-40"
+            >
+              Next →
+            </button>
+          </div>
+        </div>
+        {loading && questions.length === 0 ? (
+          <p className="p-6 text-gray-500">Loading questions...</p>
+        ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-left text-sm">
               <thead className="bg-gray-50 text-xs uppercase text-gray-500">
@@ -376,10 +450,10 @@ export default function CoachQuestionsPage() {
               <tbody className="divide-y divide-gray-100">
                 {questions.map((q) => (
                   <tr key={q.id} className="hover:bg-gray-50">
-                    <td className="px-4 py-3 whitespace-nowrap">
+                    <td className="whitespace-nowrap px-4 py-3">
                       {q.subject.replace(/_/g, " ")}
                     </td>
-                    <td className="px-4 py-3 whitespace-nowrap">
+                    <td className="whitespace-nowrap px-4 py-3">
                       {q.questionType.replace(/_/g, " ")}
                     </td>
                     <td className="px-4 py-3">{q.difficulty}</td>
@@ -407,7 +481,7 @@ export default function CoachQuestionsPage() {
                     </td>
                   </tr>
                 ))}
-                {questions.length === 0 && (
+                {!loading && questions.length === 0 && (
                   <tr>
                     <td
                       colSpan={6}
@@ -420,8 +494,27 @@ export default function CoachQuestionsPage() {
               </tbody>
             </table>
           </div>
+        )}
+        <div className="flex items-center justify-end gap-2 border-t border-gray-200 bg-gray-50 px-4 py-3">
+          <button
+            onClick={() => setPage((p) => Math.max(1, p - 1))}
+            disabled={page <= 1 || loading}
+            className="rounded-md border border-gray-300 px-3 py-1 text-sm font-medium text-gray-700 hover:bg-gray-100 disabled:opacity-40"
+          >
+            ← Prev
+          </button>
+          <span className="text-xs text-gray-500">
+            Page {page} / {totalPages}
+          </span>
+          <button
+            onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+            disabled={page >= totalPages || loading}
+            className="rounded-md border border-gray-300 px-3 py-1 text-sm font-medium text-gray-700 hover:bg-gray-100 disabled:opacity-40"
+          >
+            Next →
+          </button>
         </div>
-      )}
+      </div>
     </div>
   );
 }

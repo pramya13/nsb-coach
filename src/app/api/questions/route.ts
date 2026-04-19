@@ -13,18 +13,43 @@ export async function GET(request: Request) {
   const subject = searchParams.get("subject");
   const difficulty = searchParams.get("difficulty");
   const questionType = searchParams.get("type");
+  const source = searchParams.get("source");
+  const search = searchParams.get("search");
+
+  const pageParam = searchParams.get("page");
+  const pageSizeParam = searchParams.get("pageSize");
+
+  const page = Math.max(1, parseInt(pageParam ?? "1", 10) || 1);
+  const requestedSize = parseInt(pageSizeParam ?? "50", 10) || 50;
+  const pageSize = Math.min(200, Math.max(1, requestedSize));
 
   const where: Record<string, unknown> = {};
   if (subject) where.subject = subject;
   if (difficulty) where.difficulty = parseInt(difficulty, 10);
   if (questionType) where.questionType = questionType;
+  if (source) where.source = source;
+  if (search && search.trim()) {
+    const term = search.trim();
+    where.OR = [
+      { questionText: { contains: term, mode: "insensitive" } },
+      { correctAnswer: { contains: term, mode: "insensitive" } },
+      { topic: { contains: term, mode: "insensitive" } },
+    ];
+  }
 
-  const questions = await prisma.question.findMany({
-    where,
-    orderBy: { createdAt: "desc" },
-  });
+  const [total, items] = await Promise.all([
+    prisma.question.count({ where }),
+    prisma.question.findMany({
+      where,
+      orderBy: [{ createdAt: "desc" }, { id: "desc" }],
+      skip: (page - 1) * pageSize,
+      take: pageSize,
+    }),
+  ]);
 
-  return NextResponse.json(questions);
+  const hasMore = page * pageSize < total;
+
+  return NextResponse.json({ items, total, hasMore, page, pageSize });
 }
 
 export async function POST(request: Request) {
