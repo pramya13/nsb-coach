@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
+import Floaties from "@/components/Floaties";
 
 export default function Home() {
   const { data: session, status } = useSession();
@@ -27,26 +28,27 @@ export default function Home() {
   }
 
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center bg-gradient-to-b from-[#0078d4]/5 to-white px-4">
+    <div className="science-bg flex flex-col items-center justify-center px-4">
+      <Floaties />
       <div className="text-center">
-        <span className="text-7xl">🔬</span>
-        <h1 className="mt-4 text-5xl font-extrabold tracking-tight text-gray-900">
+        <span className="inline-block text-7xl animate-bounce">🔬</span>
+        <h1 className="mt-4 bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 bg-clip-text text-5xl font-extrabold tracking-tight text-transparent sm:text-6xl">
           NSB Coach
         </h1>
-        <p className="mt-3 text-xl text-gray-500">
-          National Science Bowl Coaching Platform
+        <p className="mt-3 text-xl font-medium text-gray-700">
+          🚀 Your launchpad for Science Bowl greatness! 🧪
         </p>
 
         <div className="mt-10 flex flex-col items-center gap-4 sm:flex-row sm:justify-center">
           <Link
             href="/login"
-            className="inline-flex h-12 w-44 items-center justify-center rounded-lg bg-[#0078d4] text-sm font-semibold text-white shadow-sm transition-colors hover:bg-[#006abc]"
+            className="inline-flex h-12 w-44 items-center justify-center rounded-full bg-gradient-to-r from-blue-500 to-indigo-600 text-base font-bold text-white shadow-lg transition-all hover:scale-105 hover:shadow-xl"
           >
             Log In
           </Link>
           <Link
             href="/signup"
-            className="inline-flex h-12 w-44 items-center justify-center rounded-lg border border-gray-300 bg-white text-sm font-semibold text-gray-700 shadow-sm transition-colors hover:bg-gray-50"
+            className="inline-flex h-12 w-44 items-center justify-center rounded-full bg-gradient-to-r from-pink-500 to-rose-500 text-base font-bold text-white shadow-lg transition-all hover:scale-105 hover:shadow-xl"
           >
             Sign Up
           </Link>

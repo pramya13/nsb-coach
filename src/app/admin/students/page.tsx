@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
+import Link from "next/link";
 
 interface Student {
   id: string;
@@ -184,16 +185,22 @@ export default function StudentsPage() {
                   <th className="px-6 py-3 font-medium">Joined</th>
                   <th className="px-6 py-3 font-medium">Study Logs</th>
                   <th className="px-6 py-3 font-medium">Quizzes</th>
+                  <th className="px-6 py-3 font-medium">Progress</th>
                 </tr>
               </thead>
               <tbody>
                 {students.map((student) => (
                   <tr
                     key={student.id}
-                    className="border-b border-gray-100 hover:bg-gray-50"
+                    className="border-b border-gray-100 hover:bg-blue-50"
                   >
-                    <td className="px-6 py-4 font-medium text-gray-900">
-                      {student.name}
+                    <td className="px-6 py-4 font-medium">
+                      <Link
+                        href={`/coach/students/${student.id}`}
+                        className="text-[#0078d4] hover:underline"
+                      >
+                        {student.name}
+                      </Link>
                     </td>
                     <td className="px-6 py-4 text-gray-600">
                       {student.email}
@@ -206,6 +213,14 @@ export default function StudentsPage() {
                     </td>
                     <td className="px-6 py-4 text-gray-900">
                       {student._count.quizSessions}
+                    </td>
+                    <td className="px-6 py-4">
+                      <Link
+                        href={`/coach/students/${student.id}`}
+                        className="inline-flex items-center gap-1 rounded-md bg-[#0078d4] px-3 py-1 text-xs font-medium text-white hover:bg-[#006abc]"
+                      >
+                        📈 View Progress
+                      </Link>
                     </td>
                   </tr>
                 ))}

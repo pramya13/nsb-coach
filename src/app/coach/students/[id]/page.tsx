@@ -122,6 +122,7 @@ export default async function StudentDetailPage({
 
       {/* Charts */}
       <div className="mb-8">
+        <h2 className="mb-4 text-xl font-bold text-gray-900">📈 Progress Trends</h2>
         <StudentCharts
           studyData={studyData}
           quizData={quizData}

@@ -18,7 +18,6 @@ body {
   font-family: Arial, Helvetica, sans-serif;
 }
 
-/* Force consistent form control styling across light/dark system themes */
 select,
 input,
 textarea {
@@ -29,4 +28,87 @@ textarea {
 select option {
   color: #171717;
   background-color: #ffffff;
+}
+
+/* ---------- Kid-friendly fun background ---------- */
+.science-bg {
+  position: relative;
+  min-height: 100vh;
+  overflow: hidden;
+  background: linear-gradient(
+    -45deg,
+    #e0f2fe,
+    #fce7f3,
+    #ede9fe,
+    #dcfce7,
+    #fef3c7
+  );
+  background-size: 400% 400%;
+  animation: gradient-shift 18s ease infinite;
+}
+
+@keyframes gradient-shift {
+  0%   { background-position: 0% 50%; }
+  50%  { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+.science-bg::before,
+.science-bg::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.science-bg::before {
+  background-image:
+    radial-gradient(circle at 12% 20%, rgba(96,165,250,0.25) 0, transparent 18%),
+    radial-gradient(circle at 88% 15%, rgba(244,114,182,0.22) 0, transparent 20%),
+    radial-gradient(circle at 75% 85%, rgba(167,139,250,0.22) 0, transparent 18%),
+    radial-gradient(circle at 15% 80%, rgba(74,222,128,0.22) 0, transparent 18%);
+}
+
+.science-bg > * {
+  position: relative;
+  z-index: 1;
+}
+
+/* Floating emoji layer */
+.floaties {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.floaties span {
+  position: absolute;
+  font-size: 2.25rem;
+  opacity: 0.55;
+  animation: float 14s ease-in-out infinite;
+  filter: drop-shadow(0 2px 6px rgba(0,0,0,0.08));
+}
+
+.floaties span:nth-child(1)  { top: 8%;  left: 6%;  animation-delay: 0s;   }
+.floaties span:nth-child(2)  { top: 18%; left: 82%; animation-delay: -2s;  font-size: 2.75rem; }
+.floaties span:nth-child(3)  { top: 36%; left: 15%; animation-delay: -5s;  }
+.floaties span:nth-child(4)  { top: 50%; left: 72%; animation-delay: -7s;  font-size: 2.5rem;  }
+.floaties span:nth-child(5)  { top: 68%; left: 8%;  animation-delay: -9s;  }
+.floaties span:nth-child(6)  { top: 78%; left: 88%; animation-delay: -11s; font-size: 2.75rem; }
+.floaties span:nth-child(7)  { top: 88%; left: 38%; animation-delay: -4s;  }
+.floaties span:nth-child(8)  { top: 28%; left: 48%; animation-delay: -13s; font-size: 2rem;    }
+.floaties span:nth-child(9)  { top: 58%; left: 32%; animation-delay: -6s;  }
+.floaties span:nth-child(10) { top: 12%; left: 40%; animation-delay: -10s; font-size: 2rem;    }
+
+@keyframes float {
+  0%, 100% { transform: translateY(0)    rotate(0deg); }
+  50%      { transform: translateY(-24px) rotate(8deg); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .science-bg { animation: none; }
+  .floaties span { animation: none; }
 }

@@ -4,6 +4,7 @@ import { signIn, useSession } from "next-auth/react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useState, useEffect, Suspense } from "react";
 import Link from "next/link";
+import Floaties from "@/components/Floaties";
 
 function LoginForm() {
   const { data: session } = useSession();
@@ -49,15 +50,16 @@ function LoginForm() {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gray-50 px-4">
-      <div className="w-full max-w-md rounded-xl bg-white p-8 shadow-lg">
+    <div className="science-bg flex items-center justify-center px-4 py-10">
+      <Floaties />
+      <div className="w-full max-w-md rounded-2xl border border-white/60 bg-white/90 p-8 shadow-2xl backdrop-blur">
         <div className="mb-6 text-center">
-          <span className="text-4xl">🔬</span>
-          <h1 className="mt-2 text-2xl font-bold text-gray-900">
+          <span className="inline-block text-5xl animate-bounce">🔬</span>
+          <h1 className="mt-2 bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 bg-clip-text text-3xl font-extrabold text-transparent">
             NSB Coach
           </h1>
-          <p className="mt-1 text-sm text-gray-500">
-            Sign in to your account
+          <p className="mt-1 text-sm font-medium text-gray-600">
+            Ready to conquer the Science Bowl? 🚀
           </p>
         </div>
 
@@ -113,9 +115,9 @@ function LoginForm() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full rounded-lg bg-[#0078d4] px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-[#006abc] focus:outline-none focus:ring-2 focus:ring-[#0078d4] focus:ring-offset-2 disabled:opacity-50"
+            className="w-full rounded-full bg-gradient-to-r from-blue-500 to-indigo-600 px-4 py-2.5 text-base font-bold text-white shadow-lg transition-all hover:scale-[1.02] hover:shadow-xl focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-offset-2 disabled:opacity-50 disabled:hover:scale-100"
           >
-            {loading ? "Signing in…" : "Sign In"}
+            {loading ? "Signing in…" : "Let's go! 🚀"}
           </button>
         </form>
 
