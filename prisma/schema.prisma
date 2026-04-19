@@ -54,9 +54,12 @@ model Question {
   correctAnswer String
   sourceSet    Int?
   sourceRound  Int?
+  source       String?  // origin tag: e.g., 'doe-ms', 'sciencebowlprep', 'gdrive-mit-2020:round1.pdf'
   createdAt    DateTime @default(now())
 
   quizAnswers  QuizAnswer[]
+
+  @@index([source])
 }
 
 // ─── STUDY TRACKING ───────────────────────────────────────────

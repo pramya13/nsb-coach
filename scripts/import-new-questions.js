@@ -64,6 +64,7 @@ async function main() {
       correctAnswer: q.correctAnswer.replace(/\0/g, ''),
       sourceSet: q.sourceSet ?? null,
       sourceRound: q.sourceRound ?? null,
+      source: q.source ?? null,
     });
   }
 
