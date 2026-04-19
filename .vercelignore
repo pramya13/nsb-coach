@@ -1,3 +1,8 @@
 src/generated
 prisma/dev.db
 scripts/pdfs
+scripts/*.json
+scripts/*.mjs
+scripts/*.js
+prisma.config.local.ts
+*.md
