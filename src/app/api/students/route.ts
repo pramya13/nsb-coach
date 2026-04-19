@@ -15,6 +15,7 @@ export async function GET() {
       id: true,
       name: true,
       email: true,
+      gradeLevel: true,
       createdAt: true,
       _count: {
         select: {

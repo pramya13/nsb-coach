@@ -14,6 +14,7 @@ export async function GET(request: Request) {
   const difficulty = searchParams.get("difficulty");
   const questionType = searchParams.get("type");
   const source = searchParams.get("source");
+  const grade = searchParams.get("grade"); // MS | HS | ALL
   const search = searchParams.get("search");
 
   const pageParam = searchParams.get("page");
@@ -28,13 +29,31 @@ export async function GET(request: Request) {
   if (difficulty) where.difficulty = parseInt(difficulty, 10);
   if (questionType) where.questionType = questionType;
   if (source) where.source = source;
+
+  const andClauses: Record<string, unknown>[] = [];
+  if (grade === "MS") {
+    andClauses.push({
+      source: { contains: "-MS", mode: "insensitive" },
+    });
+  } else if (grade === "HS") {
+    andClauses.push({
+      source: { contains: "-HS", mode: "insensitive" },
+    });
+  }
+
   if (search && search.trim()) {
     const term = search.trim();
-    where.OR = [
-      { questionText: { contains: term, mode: "insensitive" } },
-      { correctAnswer: { contains: term, mode: "insensitive" } },
-      { topic: { contains: term, mode: "insensitive" } },
-    ];
+    andClauses.push({
+      OR: [
+        { questionText: { contains: term, mode: "insensitive" } },
+        { correctAnswer: { contains: term, mode: "insensitive" } },
+        { topic: { contains: term, mode: "insensitive" } },
+      ],
+    });
+  }
+
+  if (andClauses.length > 0) {
+    where.AND = andClauses;
   }
 
   const [total, items] = await Promise.all([

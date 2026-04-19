@@ -42,15 +42,28 @@ export const authOptions: NextAuthOptions = {
           name: user.name,
           email: user.email,
           role: user.role,
+          gradeLevel: user.gradeLevel,
         }
       },
     }),
   ],
   callbacks: {
-    async jwt({ token, user }) {
+    async jwt({ token, user, trigger }) {
       if (user) {
         token.id = user.id
         token.role = user.role
+        token.gradeLevel = user.gradeLevel
+      }
+      // Refresh gradeLevel from DB on session update/refresh so admin changes propagate
+      if (trigger === 'update' && token.id) {
+        const fresh = await prisma.user.findUnique({
+          where: { id: token.id as string },
+          select: { role: true, gradeLevel: true },
+        })
+        if (fresh) {
+          token.role = fresh.role
+          token.gradeLevel = fresh.gradeLevel
+        }
       }
       return token
     },
@@ -58,6 +71,7 @@ export const authOptions: NextAuthOptions = {
       if (session.user) {
         session.user.id = token.id as string
         session.user.role = token.role as string
+        session.user.gradeLevel = token.gradeLevel as string | undefined
       }
       return session
     },

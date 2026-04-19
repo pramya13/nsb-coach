@@ -24,6 +24,19 @@ export async function POST(request: NextRequest) {
     );
   }
 
+  // Grade-level filter for STUDENTS. Admin/coach get no grade restriction.
+  // If gradeLevel missing on a student, default to MS (safest).
+  let gradeFilter: Record<string, unknown> | null = null;
+  if (session.user.role === "STUDENT") {
+    const studentRecord = await prisma.user.findUnique({
+      where: { id: userId },
+      select: { gradeLevel: true },
+    });
+    const grade = studentRecord?.gradeLevel || "MS";
+    const tag = grade === "HS" ? "-HS" : "-MS";
+    gradeFilter = { source: { contains: tag, mode: "insensitive" } };
+  }
+
   // Get recently correctly answered question IDs (last 5 quizzes)
   const recentQuizzes = await prisma.quizSession.findMany({
     where: { userId, completedAt: { not: null } },
@@ -75,6 +88,7 @@ export async function POST(request: NextRequest) {
   const baseWhere = {
     subject: { in: subjects },
     ...(excludeIds.length > 0 ? { id: { notIn: excludeIds } } : {}),
+    ...(gradeFilter || {}),
   };
 
   // Fetch questions for each difficulty bucket
@@ -142,6 +156,7 @@ export async function POST(request: NextRequest) {
       where: {
         subject: { in: subjects },
         id: { notIn: [...usedIds] },
+        ...(gradeFilter || {}),
       },
       take: (totalQuestions - selected.length) * 3,
     });
@@ -159,6 +174,7 @@ export async function POST(request: NextRequest) {
       where: {
         subject: { in: subjects },
         id: { notIn: [...usedIds] },
+        ...(gradeFilter || {}),
       },
       take: (totalQuestions - selected.length) * 2,
     });

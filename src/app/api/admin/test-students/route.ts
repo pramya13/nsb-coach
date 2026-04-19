@@ -14,11 +14,12 @@ export async function POST(request: Request) {
 
   try {
     const body = await request.json();
-    const { name, email, password, seedData } = body as {
+    const { name, email, password, seedData, gradeLevel } = body as {
       name?: string;
       email?: string;
       password?: string;
       seedData?: boolean;
+      gradeLevel?: string;
     };
 
     if (!name || !email || !password) {
@@ -27,6 +28,9 @@ export async function POST(request: Request) {
         { status: 400 }
       );
     }
+
+    const normalizedGrade =
+      gradeLevel === "HS" ? "HS" : "MS";
 
     const existing = await prisma.user.findUnique({ where: { email } });
     if (existing) {
@@ -38,7 +42,13 @@ export async function POST(request: Request) {
 
     const passwordHash = await bcrypt.hash(password, 10);
     const user = await prisma.user.create({
-      data: { name, email, passwordHash, role: "STUDENT" },
+      data: {
+        name,
+        email,
+        passwordHash,
+        role: "STUDENT",
+        gradeLevel: normalizedGrade,
+      },
     });
 
     if (seedData) {

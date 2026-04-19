@@ -35,6 +35,7 @@ export default function QuestionsPage() {
   const [filterDifficulty, setFilterDifficulty] = useState("");
   const [filterType, setFilterType] = useState("");
   const [filterSource, setFilterSource] = useState("");
+  const [filterGrade, setFilterGrade] = useState<"ALL" | "MS" | "HS">("ALL");
   const [searchInput, setSearchInput] = useState("");
   const [search, setSearch] = useState("");
   const [showForm, setShowForm] = useState(false);
@@ -66,7 +67,7 @@ export default function QuestionsPage() {
 
   useEffect(() => {
     setPage(1);
-  }, [filterSubject, filterDifficulty, filterType, filterSource]);
+  }, [filterSubject, filterDifficulty, filterType, filterSource, filterGrade]);
 
   const fetchQuestions = useCallback(async () => {
     setLoading(true);
@@ -75,6 +76,7 @@ export default function QuestionsPage() {
     if (filterDifficulty) params.set("difficulty", filterDifficulty);
     if (filterType) params.set("type", filterType);
     if (filterSource) params.set("source", filterSource);
+    if (filterGrade !== "ALL") params.set("grade", filterGrade);
     if (search) params.set("search", search);
     params.set("page", String(page));
     params.set("pageSize", String(PAGE_SIZE));
@@ -86,7 +88,7 @@ export default function QuestionsPage() {
       setTotal(data.total ?? 0);
     }
     setLoading(false);
-  }, [filterSubject, filterDifficulty, filterType, filterSource, search, page]);
+  }, [filterSubject, filterDifficulty, filterType, filterSource, filterGrade, search, page]);
 
   useEffect(() => {
     fetchQuestions();
@@ -148,7 +150,7 @@ export default function QuestionsPage() {
 
     if (editingId) {
       const res = await fetch(`/api/questions/${editingId}`, {
-        method: "PUT",
+        method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
       });
@@ -257,6 +259,27 @@ export default function QuestionsPage() {
             placeholder="e.g. doe-hs"
             className="rounded-md border border-gray-300 px-3 py-1.5 text-sm focus:border-[#0078d4] focus:outline-none"
           />
+        </div>
+        <div>
+          <label className="mb-1 block text-xs font-medium text-gray-500">
+            Grade
+          </label>
+          <div className="flex gap-1">
+            {(["ALL", "MS", "HS"] as const).map((g) => (
+              <button
+                key={g}
+                type="button"
+                onClick={() => setFilterGrade(g)}
+                className={`rounded-md border px-3 py-1.5 text-sm font-medium transition ${
+                  filterGrade === g
+                    ? "border-[#0078d4] bg-[#0078d4] text-white"
+                    : "border-gray-300 bg-white text-gray-700 hover:bg-gray-50"
+                }`}
+              >
+                {g === "ALL" ? "All" : g}
+              </button>
+            ))}
+          </div>
         </div>
         <div className="min-w-[200px] flex-1">
           <label className="mb-1 block text-xs font-medium text-gray-500">

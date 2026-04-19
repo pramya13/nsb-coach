@@ -7,6 +7,7 @@ interface Student {
   id: string;
   name: string;
   email: string;
+  gradeLevel: string;
   createdAt: string;
   _count: {
     studyLogs: number;
@@ -24,7 +25,9 @@ export default function StudentsPage() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("test1234");
+  const [gradeLevel, setGradeLevel] = useState("MS");
   const [seedData, setSeedData] = useState(true);
+  const [savingGradeFor, setSavingGradeFor] = useState<string | null>(null);
 
   const fetchStudents = useCallback(async () => {
     const res = await fetch("/api/students");
@@ -45,7 +48,7 @@ export default function StudentsPage() {
     const res = await fetch("/api/admin/test-students", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ name, email, password, seedData }),
+      body: JSON.stringify({ name, email, password, seedData, gradeLevel }),
     });
 
     const data = await res.json();
@@ -56,6 +59,7 @@ export default function StudentsPage() {
       setName("");
       setEmail("");
       setPassword("test1234");
+      setGradeLevel("MS");
       setSeedData(true);
       setShowForm(false);
       fetchStudents();
@@ -63,6 +67,26 @@ export default function StudentsPage() {
       setError(data.error || "Failed to create student.");
     }
     setSubmitting(false);
+  }
+
+  async function updateGrade(studentId: string, newGrade: string) {
+    setSavingGradeFor(studentId);
+    const res = await fetch(`/api/admin/students/${studentId}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ gradeLevel: newGrade }),
+    });
+    if (res.ok) {
+      setStudents((prev) =>
+        prev.map((s) =>
+          s.id === studentId ? { ...s, gradeLevel: newGrade } : s
+        )
+      );
+    } else {
+      const data = await res.json().catch(() => ({}));
+      setError(data.error || "Failed to update grade.");
+    }
+    setSavingGradeFor(null);
   }
 
   if (loading) {
@@ -144,6 +168,19 @@ export default function StudentsPage() {
                   className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-[#0078d4] focus:outline-none focus:ring-1 focus:ring-[#0078d4]"
                 />
               </div>
+              <div>
+                <label className="mb-1 block text-sm font-medium text-gray-700">
+                  Grade Level
+                </label>
+                <select
+                  value={gradeLevel}
+                  onChange={(e) => setGradeLevel(e.target.value)}
+                  className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-[#0078d4] focus:outline-none focus:ring-1 focus:ring-[#0078d4]"
+                >
+                  <option value="MS">Middle School (MS)</option>
+                  <option value="HS">High School (HS)</option>
+                </select>
+              </div>
               <div className="flex items-end">
                 <label className="flex items-center gap-2 text-sm text-gray-700">
                   <input
@@ -182,6 +219,7 @@ export default function StudentsPage() {
                 <tr className="border-b border-gray-200 bg-gray-50 text-gray-500">
                   <th className="px-6 py-3 font-medium">Name</th>
                   <th className="px-6 py-3 font-medium">Email</th>
+                  <th className="px-6 py-3 font-medium">Grade</th>
                   <th className="px-6 py-3 font-medium">Joined</th>
                   <th className="px-6 py-3 font-medium">Study Logs</th>
                   <th className="px-6 py-3 font-medium">Quizzes</th>
@@ -204,6 +242,17 @@ export default function StudentsPage() {
                     </td>
                     <td className="px-6 py-4 text-gray-600">
                       {student.email}
+                    </td>
+                    <td className="px-6 py-4">
+                      <select
+                        value={student.gradeLevel || "MS"}
+                        onChange={(e) => updateGrade(student.id, e.target.value)}
+                        disabled={savingGradeFor === student.id}
+                        className="rounded-md border border-gray-300 px-2 py-1 text-sm focus:border-[#0078d4] focus:outline-none focus:ring-1 focus:ring-[#0078d4] disabled:opacity-60"
+                      >
+                        <option value="MS">MS</option>
+                        <option value="HS">HS</option>
+                      </select>
                     </td>
                     <td className="px-6 py-4 text-gray-500">
                       {new Date(student.createdAt).toLocaleDateString()}
