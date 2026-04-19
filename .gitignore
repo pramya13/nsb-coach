@@ -45,3 +45,5 @@ dev.db
 prisma/dev.db
 scripts/pdfs/
 scripts/sample.pdf
+.vercel
+.env*.local

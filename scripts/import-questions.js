@@ -34,13 +34,13 @@ async function main() {
     await prisma.question.createMany({
       data: batch.map(q => ({
         subject: q.subject,
-        topic: q.topic || '',
+        topic: (q.topic || '').replace(/\0/g, ''),
         difficulty: q.difficulty,
         questionType: q.questionType,
         answerFormat: q.answerFormat,
-        questionText: q.questionText,
-        choices: q.choices,
-        correctAnswer: q.correctAnswer,
+        questionText: (q.questionText || '').replace(/\0/g, ''),
+        choices: q.choices ? q.choices.replace(/\0/g, '') : null,
+        correctAnswer: (q.correctAnswer || '').replace(/\0/g, ''),
         sourceSet: q.sourceSet,
         sourceRound: q.sourceRound,
       })),
@@ -53,7 +53,7 @@ async function main() {
 
   // Print stats
   const stats = await prisma.$queryRawUnsafe(`
-    SELECT subject, COUNT(*) as count FROM Question GROUP BY subject ORDER BY count DESC
+    SELECT subject, COUNT(*)::int as count FROM "Question" GROUP BY subject ORDER BY count DESC
   `);
   console.log('\n=== Database Stats ===');
   for (const row of stats) {
