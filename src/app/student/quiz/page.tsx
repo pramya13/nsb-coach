@@ -3,10 +3,16 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 
 const SUBJECTS = [
-  "LIFE_SCIENCE",
-  "EARTH_SPACE",
-  "PHYSICAL_SCIENCE",
   "MATH",
+  "BIOLOGY",
+  "LIFE_SCIENCE",
+  "CHEMISTRY",
+  "PHYSICS",
+  "PHYSICAL_SCIENCE",
+  "GENERAL_SCIENCE",
+  "ASTRONOMY",
+  "EARTH_SCIENCE",
+  "EARTH_AND_SPACE",
   "ENERGY",
 ];
 const QUESTION_COUNTS = [5, 10, 15, 20, 25];

@@ -3,10 +3,16 @@
 import { useState, useEffect, useCallback } from "react";
 
 const SUBJECTS = [
-  "LIFE_SCIENCE",
-  "EARTH_SPACE",
-  "PHYSICAL_SCIENCE",
   "MATH",
+  "BIOLOGY",
+  "LIFE_SCIENCE",
+  "CHEMISTRY",
+  "PHYSICS",
+  "PHYSICAL_SCIENCE",
+  "GENERAL_SCIENCE",
+  "ASTRONOMY",
+  "EARTH_SCIENCE",
+  "EARTH_AND_SPACE",
   "ENERGY",
 ];
 

@@ -1,0 +1,26 @@
+Using cached URLs: 24465
+Fetching 24465 question pages with concurrency=10...
+  Processed 200/24465 (200 parsed so far)
+  Processed 400/24465 (400 parsed so far)
+  Processed 600/24465 (600 parsed so far)
+  Processed 800/24465 (800 parsed so far)
+  Processed 1000/24465 (1000 parsed so far)
+  Processed 1200/24465 (1200 parsed so far)
+  Processed 1400/24465 (1400 parsed so far)
+  Error at 1411 (NSB_Round_Robin_2020_HS_Round11_Q11_TOSS_UP.html): HTTP 504 for https://sciencebowlprep.com/questions/NSB_Round_Robin_2020_HS_Round11_Q11_TOSS_UP.html
+  Error at 1414 (NSB_Round_Robin_2020_HS_Round11_Q12_BONUS.html): HTTP 504 for https://sciencebowlprep.com/questions/NSB_Round_Robin_2020_HS_Round11_Q12_BONUS.html
+  Error at 1416 (NSB_Round_Robin_2020_HS_Round11_Q13_BONUS.html): HTTP 504 for https://sciencebowlprep.com/questions/NSB_Round_Robin_2020_HS_Round11_Q13_BONUS.html
+  Error at 1413 (NSB_Round_Robin_2020_HS_Round11_Q12_TOSS_UP.html): HTTP 504 for https://sciencebowlprep.com/questions/NSB_Round_Robin_2020_HS_Round11_Q12_TOSS_UP.html
+  Error at 1420 (NSB_Round_Robin_2020_HS_Round11_Q15_BONUS.html): HTTP 504 for https://sciencebowlprep.com/questions/NSB_Round_Robin_2020_HS_Round11_Q15_BONUS.html
+  Error at 1418 (NSB_Round_Robin_2020_HS_Round11_Q14_BONUS.html): HTTP 504 for https://sciencebowlprep.com/questions/NSB_Round_Robin_2020_HS_Round11_Q14_BONUS.html
+  Error at 1419 (NSB_Round_Robin_2020_HS_Round11_Q15_TOSS_UP.html): HTTP 504 for https://sciencebowlprep.com/questions/NSB_Round_Robin_2020_HS_Round11_Q15_TOSS_UP.html
+  Error at 1421 (NSB_Round_Robin_2020_HS_Round11_Q16_TOSS_UP.html): HTTP 504 for https://sciencebowlprep.com/questions/NSB_Round_Robin_2020_HS_Round11_Q16_TOSS_UP.html
+  Processed 1600/24465 (1589 parsed so far)
+  Processed 1800/24465 (1787 parsed so far)
+  Processed 2000/24465 (2059 parsed so far)
+  Processed 2200/24465 (2191 parsed so far)
+  Processed 2400/24465 (2405 parsed so far)
+  Processed 2600/24465 (2591 parsed so far)
+  Processed 2800/24465 (2791 parsed so far)
+  Processed 3000/24465 (2989 parsed so far)
+  Processed 3200/24465 (3187 parsed so far)

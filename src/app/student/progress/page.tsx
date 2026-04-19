@@ -14,10 +14,16 @@ import {
 
 const SUBJECTS = [
   { value: "", label: "All Subjects" },
-  { value: "LIFE_SCIENCE", label: "Life Science" },
-  { value: "EARTH_SPACE", label: "Earth & Space" },
-  { value: "PHYSICAL_SCIENCE", label: "Physical Science" },
   { value: "MATH", label: "Math" },
+  { value: "BIOLOGY", label: "Biology" },
+  { value: "LIFE_SCIENCE", label: "Life Science" },
+  { value: "CHEMISTRY", label: "Chemistry" },
+  { value: "PHYSICS", label: "Physics" },
+  { value: "PHYSICAL_SCIENCE", label: "Physical Science" },
+  { value: "GENERAL_SCIENCE", label: "General Science" },
+  { value: "ASTRONOMY", label: "Astronomy" },
+  { value: "EARTH_SCIENCE", label: "Earth Science" },
+  { value: "EARTH_AND_SPACE", label: "Earth & Space" },
   { value: "ENERGY", label: "Energy" },
 ];
 

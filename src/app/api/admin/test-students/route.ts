@@ -3,7 +3,7 @@ import bcrypt from "bcryptjs";
 import { prisma } from "@/lib/db";
 import { requireRole } from "@/lib/auth-utils";
 
-const SUBJECTS = ["LIFE_SCIENCE", "EARTH_SPACE", "PHYSICAL_SCIENCE", "MATH", "ENERGY"];
+const SUBJECTS = ["MATH", "BIOLOGY", "LIFE_SCIENCE", "CHEMISTRY", "PHYSICS", "PHYSICAL_SCIENCE", "GENERAL_SCIENCE", "ASTRONOMY", "EARTH_SCIENCE", "EARTH_AND_SPACE", "ENERGY"];
 
 function randomFrom<T>(arr: T[]): T {
   return arr[Math.floor(Math.random() * arr.length)];
