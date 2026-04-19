@@ -11,7 +11,18 @@ export async function GET() {
 
   const students = await prisma.user.findMany({
     where: { role: "STUDENT" },
-    select: { id: true, name: true, email: true },
+    select: {
+      id: true,
+      name: true,
+      email: true,
+      createdAt: true,
+      _count: {
+        select: {
+          studyLogs: true,
+          quizSessions: true,
+        },
+      },
+    },
     orderBy: { name: "asc" },
   });
 

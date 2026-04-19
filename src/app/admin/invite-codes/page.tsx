@@ -62,6 +62,35 @@ export default function InviteCodesPage() {
     setTimeout(() => setCopied(null), 2000);
   }
 
+  function copyEmail(code: InviteCode) {
+    const roleLabel = code.targetRole === "COACH" ? "coach" : "student";
+    const signupUrl = `${window.location.origin}/signup`;
+    const expiryLine = code.expiresAt
+      ? `\nThis code expires on ${new Date(code.expiresAt).toLocaleDateString()}.`
+      : "";
+    const emailText = `Hi,
+
+You've been invited to join the NSB Coach platform as a ${roleLabel}!
+
+To get started:
+1. Go to ${signupUrl}
+2. Enter your invite code: ${code.code}
+3. Create your account with your name, email, and password
+
+Once registered, you can log in at ${window.location.origin}/login to start ${
+      roleLabel === "coach"
+        ? "managing students, reviewing questions, and entering test scores"
+        : "logging your study time, taking quizzes, and tracking your progress"
+    }.${expiryLine}
+
+Looking forward to having you on the team!
+
+— NSB Coach`;
+    navigator.clipboard.writeText(emailText);
+    setCopied("email:" + code.code);
+    setTimeout(() => setCopied(null), 2000);
+  }
+
   if (loading) {
     return (
       <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
@@ -159,12 +188,25 @@ export default function InviteCodesPage() {
                         {new Date(code.createdAt).toLocaleDateString()}
                       </td>
                       <td className="px-6 py-4">
-                        <button
-                          onClick={() => copyCode(code.code)}
-                          className="text-sm font-medium text-[#0078d4] hover:text-[#006abc]"
-                        >
-                          {copied === code.code ? "Copied!" : "Copy"}
-                        </button>
+                        <div className="flex items-center gap-3">
+                          <button
+                            onClick={() => copyCode(code.code)}
+                            className="text-sm font-medium text-[#0078d4] hover:text-[#006abc]"
+                          >
+                            {copied === code.code ? "Copied!" : "Copy code"}
+                          </button>
+                          {!code.usedBy && (
+                            <button
+                              onClick={() => copyEmail(code)}
+                              className="text-sm font-medium text-[#0078d4] hover:text-[#006abc]"
+                              title="Copy a ready-to-send invite email with this code"
+                            >
+                              {copied === "email:" + code.code
+                                ? "Email copied!"
+                                : "Copy email"}
+                            </button>
+                          )}
+                        </div>
                       </td>
                     </tr>
                   );
