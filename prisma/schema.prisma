@@ -17,6 +17,7 @@ model User {
   email        String   @unique
   passwordHash String
   role         String   @default("STUDENT") // ADMIN, COACH, STUDENT
+  gradeLevel   String   @default("MS")      // MS or HS (only meaningful for STUDENT)
   createdAt    DateTime @default(now())
 
   inviteCodeUsed   InviteCode?   @relation("UsedBy")
